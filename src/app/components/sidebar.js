@@ -25,13 +25,20 @@ export default function Sidebar({ activeTab, onTabChange, userRole = 'admin' }) 
         { id: 'history', label: 'Lịch sử di chuyển' },
     ];
 
-    const menuItems = userRole === 'parent' ? parentMenuItems : adminMenuItems;
+    // Menu cho Driver (Tài xế)
+    const driverMenuItems = [
+        { id: 'routes', label: 'Tuyến đường' },
+        { id: 'students', label: 'Quản lý học sinh' },
+        { id: 'schedule', label: 'Lịch chạy' },
+        { id: 'notifications', label: 'Thông báo' },
+    ];
+
+    const menuItems = userRole === 'parent' ? parentMenuItems :
+        userRole === 'driver' ? driverMenuItems : adminMenuItems;
 
     return (
         <div className="sidebar">
-            {/* <div className="sidebar-header">
-                <h4>{userRole === 'parent' ? '👨‍👩‍👧 Phụ huynh' : '⚙️ Quản trị'}</h4>
-            </div> */}
+
 
             <Nav className="sidebar-nav flex-column">
                 {menuItems.map((item) => (
