@@ -94,6 +94,7 @@ export default function RegisterPage() {
                                             type="text"
                                             name="fullName"
                                             placeholder="Nhập họ và tên"
+                                            // autoComplete="off"
                                             value={formData.fullName}
                                             onChange={handleChange}
                                             required
@@ -108,6 +109,7 @@ export default function RegisterPage() {
                                                     type="email"
                                                     name="email"
                                                     placeholder="Nhập email"
+                                                    // autoComplete="off"
                                                     value={formData.email}
                                                     onChange={handleChange}
                                                     required
@@ -121,6 +123,7 @@ export default function RegisterPage() {
                                                     type="tel"
                                                     name="phone"
                                                     placeholder="Nhập số điện thoại"
+                                                    // autoComplete="off"
                                                     value={formData.phone}
                                                     onChange={handleChange}
                                                     required
@@ -149,6 +152,7 @@ export default function RegisterPage() {
                                                 <Form.Control
                                                     type="password"
                                                     name="password"
+                                                    // autoComplete="off"
                                                     placeholder="Nhập mật khẩu"
                                                     value={formData.password}
                                                     onChange={handleChange}
@@ -162,6 +166,7 @@ export default function RegisterPage() {
                                                 <Form.Control
                                                     type="password"
                                                     name="confirmPassword"
+                                                    // autoComplete="off"
                                                     placeholder="Nhập lại mật khẩu"
                                                     value={formData.confirmPassword}
                                                     onChange={handleChange}
@@ -171,15 +176,6 @@ export default function RegisterPage() {
                                         </Col>
                                     </Row>
 
-
-                                    <Button
-                                        variant="primary"
-                                        type="submit"
-                                        className="w-100 mb-3"
-                                        disabled={loading}
-                                    >
-                                        {loading ? 'Đang tạo tài khoản...' : 'Đăng ký'}
-                                    </Button>
 
                                     <div className="text-center">
                                         <span className="text-muted">Đã có tài khoản? </span>

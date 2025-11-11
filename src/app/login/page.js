@@ -61,9 +61,11 @@ export default function LoginPage() {
 
             // Chuyển hướng tùy theo role
             if (user.role === 'driver') {
-                window.location.href = '/'; // Hoặc trang driver nếu có
+                window.location.href = '/driver'; // Trang tài xế
+            } else if (user.role === 'parent') {
+                window.location.href = '/parent'; // Trang phụ huynh
             } else {
-                window.location.href = '/'; // Trang phụ huynh
+                window.location.href = '/'; // Trang chủ
             }
         } else {
             setError('Email hoặc mật khẩu không chính xác!');
@@ -90,6 +92,7 @@ export default function LoginPage() {
                                         <Form.Control
                                             type="email"
                                             name="email"
+                                            // autoComplete="off"
                                             placeholder="Nhập email của bạn"
                                             value={formData.email}
                                             onChange={handleChange}
@@ -102,6 +105,7 @@ export default function LoginPage() {
                                         <Form.Control
                                             type="password"
                                             name="password"
+                                            // autoComplete="off"
                                             placeholder="Nhập mật khẩu"
                                             value={formData.password}
                                             onChange={handleChange}

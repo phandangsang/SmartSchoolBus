@@ -1,4 +1,13 @@
 /* Authentication Pages Styles */
+/* Remove autofill background */
+.form-control:-webkit-autofill,
+.form-control:-webkit-autofill:hover,
+.form-control:-webkit-autofill:focus,
+.form-control:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+    box-shadow: 0 0 0 30px white inset !important;
+    -webkit-text-fill-color: #1a1a1a !important;
+}
 
 .auth-page {
     min-height: 100vh;
@@ -63,24 +72,12 @@
     border-radius: 8px;
     border: 1px solid #e2e8f0;
     transition: all 0.3s ease;
-    background-color: transparent !important;
 }
 
 .auth-card .form-control:focus,
 .auth-card .form-select:focus {
     border-color: #667eea;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    background-color: transparent !important;
-}
-
-/* Loại bỏ background autofill của Chrome */
-.auth-card .form-control:-webkit-autofill,
-.auth-card .form-control:-webkit-autofill:hover,
-.auth-card .form-control:-webkit-autofill:focus,
-.auth-card .form-control:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 30px white inset !important;
-    box-shadow: 0 0 0 30px white inset !important;
-    -webkit-text-fill-color: #2d3748 !important;
 }
 
 

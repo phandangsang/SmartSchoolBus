@@ -50,12 +50,6 @@ export default function Header() {
             </div>
 
             <div className="header-right">
-                <button className="icon-button notify-button" aria-label="Notifications">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0 1 18 14.158V11a6 6 0 0 0-5-5.917V4a2 2 0 1 0-4 0v1.083A6 6 0 0 0 4 11v3.159c0 .538-.214 1.055-.595 1.436L2 17h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    <span className="notify-dot" />
-                </button>
 
                 {isLoggedIn ? (
                     <Dropdown align="end">

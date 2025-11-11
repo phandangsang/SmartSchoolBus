@@ -254,7 +254,7 @@ export default function AdminPage() {
                             <p className="admin-subtitle">Danh sách học sinh trong hệ thống</p>
                         </div>
                         <div className="d-flex justify-content-between align-items-center mb-3">
-                            <h5 className="mb-0">📋 Danh sách học sinh</h5>
+                            <h5 className="mb-0"> Danh sách học sinh</h5>
                             <Button variant="primary" size="sm" onClick={() => setShowStudentModal(true)}>+ Thêm học sinh</Button>
                         </div>
                         <Card>
@@ -301,7 +301,7 @@ export default function AdminPage() {
                             <p className="admin-subtitle">Danh sách tài xế trong hệ thống</p>
                         </div>
                         <div className="d-flex justify-content-between align-items-center mb-3">
-                            <h5 className="mb-0">🚗 Danh sách tài xế</h5>
+                            <h5 className="mb-0"> Danh sách tài xế</h5>
                             <Button variant="primary" size="sm" onClick={() => setShowDriverModal(true)}>+ Thêm tài xế</Button>
                         </div>
                         <Card>
@@ -354,7 +354,7 @@ export default function AdminPage() {
                             <p className="admin-subtitle">Danh sách xe buýt và trạng thái hoạt động</p>
                         </div>
                         <div className="d-flex justify-content-between align-items-center mb-3">
-                            <h5 className="mb-0">🚌 Danh sách xe buýt</h5>
+                            <h5 className="mb-0"> Danh sách xe buýt</h5>
                             <Button variant="primary" size="sm" onClick={() => setShowBusModal(true)}>+ Thêm xe mới</Button>
                         </div>
                         <Card>
@@ -405,7 +405,7 @@ export default function AdminPage() {
                             <p className="admin-subtitle">Danh sách các tuyến đường xe buýt</p>
                         </div>
                         <div className="d-flex justify-content-between align-items-center mb-3">
-                            <h5 className="mb-0">🗺️ Tuyến đường</h5>
+                            <h5 className="mb-0"> Tuyến đường</h5>
                             <Button variant="primary" size="sm" onClick={() => setShowRouteModal(true)}>+ Thêm tuyến</Button>
                         </div>
                         <Card>
@@ -530,7 +530,7 @@ export default function AdminPage() {
                             <p className="admin-subtitle">Quản lý lịch trình xe buýt</p>
                         </div>
                         <div className="d-flex justify-content-between align-items-center mb-3">
-                            <h5 className="mb-0">📅 Lịch trình tuần/tháng</h5>
+                            <h5 className="mb-0"> Lịch trình tuần/tháng</h5>
                             <Button variant="primary" size="sm" onClick={() => setShowScheduleModal(true)}>+ Tạo lịch trình mới</Button>
                         </div>
                         <Card>
@@ -573,6 +573,17 @@ export default function AdminPage() {
                     </>
                 );
 
+            case 'messages':
+                return (
+                    <>
+                        <div className="admin-header mb-4"></div>
+                        <h1 className="admin-title">Tin nhắn </h1>
+                        <p className="admin-subtitle">Quản lý và phản hồi tin nhắn </p>
+                        <div />
+                    </>
+                );
+
+
             case 'tracking':
                 return (
                     <>
@@ -580,20 +591,7 @@ export default function AdminPage() {
                             <h1 className="admin-title">Theo dõi GPS</h1>
                             <p className="admin-subtitle">Vị trí xe buýt thời gian thực</p>
                         </div>
-                        <Card>
-                            <Card.Body className="text-center py-5">
-                                <div className="mb-4">
-                                    <span style={{ fontSize: '4rem' }}>📍</span>
-                                </div>
-                                <h4>Cập nhật vị trí xe buýt theo thời gian thực (GPS)</h4>
-                                <p className="text-muted mb-4">
-                                    Hỗ trợ giám sát và xử lý kịp thời các sự cố phát sinh (tối đa trễ 3 giây)
-                                </p>
-                                <div className="alert alert-info d-inline-block">
-                                    <strong>Tính năng đang phát triển:</strong> Tích hợp bản đồ Google Maps/Mapbox để hiển thị vị trí thời gian thực
-                                </div>
-                            </Card.Body>
-                        </Card>
+
                     </>
                 );
 
@@ -622,7 +620,7 @@ export default function AdminPage() {
                             <Form.Label>Họ và tên <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Nhập họ tên học sinh"
+                                placeholder=""
                                 value={studentForm.name || ''}
                                 onChange={(e) => setStudentForm({ ...studentForm, name: e.target.value })}
                             />
@@ -631,7 +629,7 @@ export default function AdminPage() {
                             <Form.Label>Lớp <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Ví dụ: 10A1"
+                                placeholder=""
                                 value={studentForm.class || ''}
                                 onChange={(e) => setStudentForm({ ...studentForm, class: e.target.value })}
                             />
@@ -640,7 +638,7 @@ export default function AdminPage() {
                             <Form.Label>Địa chỉ <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Nhập địa chỉ nhà học sinh"
+                                placeholder=""
                                 value={studentForm.address || ''}
                                 onChange={(e) => setStudentForm({ ...studentForm, address: e.target.value })}
                             />
@@ -668,7 +666,7 @@ export default function AdminPage() {
                             <Form.Label>Họ và tên <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Nhập họ tên tài xế"
+                                placeholder=""
                                 value={driverForm.name}
                                 onChange={(e) => setDriverForm({ ...driverForm, name: e.target.value })}
                             />
@@ -677,7 +675,7 @@ export default function AdminPage() {
                             <Form.Label>Số điện thoại <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="tel"
-                                placeholder="Ví dụ: 0912345678"
+                                placeholder=""
                                 value={driverForm.phone}
                                 onChange={(e) => setDriverForm({ ...driverForm, phone: e.target.value })}
                             />
@@ -697,7 +695,7 @@ export default function AdminPage() {
                             <Form.Label>Xe phụ trách</Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Ví dụ: Xe 01"
+                                placeholder=""
                                 value={driverForm.bus}
                                 onChange={(e) => setDriverForm({ ...driverForm, bus: e.target.value })}
                             />
@@ -735,7 +733,7 @@ export default function AdminPage() {
                             <Form.Label>Mã xe <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Ví dụ: XE03"
+                                placeholder=""
                                 value={busForm.id}
                                 onChange={(e) => setBusForm({ ...busForm, id: e.target.value })}
                             />
@@ -744,7 +742,7 @@ export default function AdminPage() {
                             <Form.Label>Biển số <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Ví dụ: 29A-12345"
+                                placeholder=""
                                 value={busForm.plateNumber}
                                 onChange={(e) => setBusForm({ ...busForm, plateNumber: e.target.value })}
                             />
@@ -753,7 +751,7 @@ export default function AdminPage() {
                             <Form.Label>Số ghế <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="number"
-                                placeholder="Ví dụ: 45"
+                                placeholder=""
                                 value={busForm.seats}
                                 onChange={(e) => setBusForm({ ...busForm, seats: e.target.value })}
                             />
@@ -792,7 +790,7 @@ export default function AdminPage() {
                             <Form.Label>Mã tuyến <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Ví dụ: R001"
+                                placeholder=""
                                 value={routeForm.id}
                                 onChange={(e) => setRouteForm({ ...routeForm, id: e.target.value })}
                             />
@@ -801,7 +799,7 @@ export default function AdminPage() {
                             <Form.Label>Tuyến đường <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Ví dụ: SGU - HCMUTE"
+                                placeholder=""
                                 value={routeForm.name}
                                 onChange={(e) => setRouteForm({ ...routeForm, name: e.target.value })}
                             />
@@ -810,7 +808,7 @@ export default function AdminPage() {
                             <Form.Label>Khoảng cách <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Ví dụ: 15 km"
+                                placeholder=""
                                 value={routeForm.distance}
                                 onChange={(e) => setRouteForm({ ...routeForm, distance: e.target.value })}
                             />
@@ -838,7 +836,7 @@ export default function AdminPage() {
                             <Form.Label>Tuyến đường <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Nhập tên tuyến đường"
+                                placeholder=""
                                 value={scheduleForm.route}
                                 onChange={(e) => setScheduleForm({ ...scheduleForm, route: e.target.value })}
                             />
@@ -847,7 +845,7 @@ export default function AdminPage() {
                             <Form.Label>Xe buýt <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Ví dụ: Xe 01"
+                                placeholder=""
                                 value={scheduleForm.bus}
                                 onChange={(e) => setScheduleForm({ ...scheduleForm, bus: e.target.value })}
                             />
@@ -858,6 +856,9 @@ export default function AdminPage() {
                                 type="time"
                                 value={scheduleForm.departure}
                                 onChange={(e) => setScheduleForm({ ...scheduleForm, departure: e.target.value })}
+                                step="60"
+                                pattern="[0-9]{2}:[0-9]{2}"
+                                lang="vi"
                             />
                         </Form.Group>
                         <Form.Group className="mb-3">
@@ -866,6 +867,9 @@ export default function AdminPage() {
                                 type="time"
                                 value={scheduleForm.arrival}
                                 onChange={(e) => setScheduleForm({ ...scheduleForm, arrival: e.target.value })}
+                                step="60"
+                                pattern="[0-9]{2}:[0-9]{2}"
+                                lang="vi"
                             />
                         </Form.Group>
                         <Form.Group className="mb-3">
