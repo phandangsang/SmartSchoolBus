@@ -1,0 +1,83 @@
+/* [project]/src/app/styles/footer.css [app-client] (css) */
+.app-footer {
+  color: #fff;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-top: 4px solid #ffffff1a;
+  margin-top: auto;
+  padding: 3rem 0 2rem;
+}
+
+.footer-brand {
+  justify-content: center;
+  align-items: center;
+  gap: .75rem;
+  display: flex;
+}
+
+@media (min-width: 768px) {
+  .footer-brand {
+    justify-content: flex-start;
+  }
+}
+
+.footer-logo {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.footer-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.footer-description {
+  opacity: .9;
+  color: #fffffff2;
+  font-size: .9rem;
+}
+
+.footer-links {
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+  display: flex;
+}
+
+@media (min-width: 768px) {
+  .footer-links {
+    justify-content: flex-end;
+  }
+}
+
+.footer-link {
+  color: #fff;
+  opacity: .9;
+  font-size: .95rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: opacity .3s;
+}
+
+.footer-link:hover {
+  color: #fff;
+  opacity: 1;
+  text-decoration: underline;
+}
+
+.footer-copyright {
+  opacity: .8;
+  color: #ffffffe6;
+  font-size: .85rem;
+}
+
+body {
+  flex-direction: column;
+  min-height: 100vh;
+  display: flex;
+}
+
+main {
+  flex: 1;
+}
+
+/*# sourceMappingURL=src_app_styles_footer_css_bad6b30c._.single.css.map*/

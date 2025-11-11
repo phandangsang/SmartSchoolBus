@@ -1,0 +1,337 @@
+/* [project]/src/app/styles/home.css [app-client] (css) */
+.home-page {
+  background: linear-gradient(#f8f9fa 0%, #fff 100%);
+  min-height: 100vh;
+}
+
+.hero-section {
+  color: #fff;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 80px 0 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section:before {
+  content: "";
+  background: #ffffff1a;
+  border-radius: 50%;
+  width: 600px;
+  height: 600px;
+  position: absolute;
+  top: -50%;
+  right: -10%;
+}
+
+.hero-title {
+  margin-bottom: 1.5rem;
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.hero-subtitle {
+  opacity: .95;
+  margin-bottom: 2rem;
+  font-size: 1.25rem;
+  line-height: 1.6;
+}
+
+.hero-actions {
+  flex-wrap: wrap;
+  gap: 1rem;
+  display: flex;
+}
+
+.hero-image {
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+  display: flex;
+  position: relative;
+}
+
+.map-placeholder {
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  background: #ffffff26;
+  border: 2px solid #ffffff4d;
+  border-radius: 20px;
+  justify-content: center;
+  align-items: center;
+  width: 350px;
+  height: 350px;
+  display: flex;
+  position: relative;
+  box-shadow: 0 20px 60px #0000004d;
+}
+
+.map-marker, .map-bus {
+  font-size: 3rem;
+  animation: 3s ease-in-out infinite float;
+  position: absolute;
+}
+
+.map-marker {
+  top: 20%;
+  left: 30%;
+}
+
+.map-bus {
+  animation-delay: 1.5s;
+  bottom: 30%;
+  right: 25%;
+}
+
+.pulse-ring {
+  border: 3px solid #fff9;
+  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+  animation: 2s ease-out infinite pulse;
+  position: absolute;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+    transform: scale(.5);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(2);
+  }
+}
+
+.stats-section {
+  z-index: 2;
+  margin-top: -50px;
+  padding: 60px 0;
+  position: relative;
+}
+
+.stat-card {
+  background: #fff;
+  border: none;
+  border-radius: 16px;
+  transition: transform .3s, box-shadow .3s;
+  box-shadow: 0 4px 20px #00000014;
+}
+
+.stat-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px #00000026;
+}
+
+.stat-icon {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.stat-value {
+  margin-bottom: .5rem;
+  font-size: 2.5rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.stat-title {
+  color: #6c757d;
+  font-size: .875rem;
+  font-weight: 500;
+}
+
+.features-section {
+  padding: 80px 0;
+}
+
+.section-header {
+  margin-bottom: 4rem;
+}
+
+.section-title {
+  color: #2d3748;
+  margin-bottom: 1rem;
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.section-subtitle {
+  color: #718096;
+  max-width: 600px;
+  margin: 0 auto;
+  font-size: 1.125rem;
+}
+
+.feature-card {
+  background: #fff;
+  border: none;
+  border-radius: 16px;
+  transition: all .3s;
+  box-shadow: 0 2px 10px #0000000f;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px #0000001f;
+}
+
+.feature-icon {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.feature-title {
+  color: #2d3748;
+  margin-bottom: .75rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.feature-description {
+  color: #718096;
+  margin-bottom: 0;
+  font-size: .925rem;
+  line-height: 1.6;
+}
+
+.activities-section {
+  padding: 60px 0 100px;
+}
+
+.activity-card, .quick-actions-card {
+  background: #fff;
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px #00000014;
+}
+
+.activity-card .card-header, .quick-actions-card .card-header {
+  background: #fff;
+  border-bottom: 1px solid #e9ecef;
+  border-radius: 16px 16px 0 0;
+  padding: 1.25rem 1.5rem;
+}
+
+.activity-item {
+  border-bottom: 1px solid #f1f3f5;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  display: flex;
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+}
+
+.activity-info {
+  flex: 1;
+}
+
+.activity-bus {
+  color: #2d3748;
+  margin-bottom: .25rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.activity-route {
+  color: #718096;
+  font-size: .875rem;
+}
+
+.activity-status {
+  border-radius: 20px;
+  padding: .5rem 1rem;
+  font-weight: 500;
+}
+
+.quick-actions-card .btn {
+  text-align: left;
+  border-radius: 10px;
+  padding: .75rem 1rem;
+  font-weight: 500;
+}
+
+@media (max-width: 991px) {
+  .hero-title {
+    font-size: 2.25rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1.125rem;
+  }
+
+  .hero-image {
+    height: 300px;
+    margin-top: 3rem;
+  }
+
+  .map-placeholder {
+    width: 280px;
+    height: 280px;
+  }
+
+  .section-title {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .hero-section {
+    padding: 60px 0 40px;
+  }
+
+  .hero-title {
+    font-size: 1.875rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+  }
+
+  .hero-actions .btn {
+    width: 100%;
+  }
+
+  .stats-section {
+    margin-top: -30px;
+    padding: 40px 0;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+  }
+
+  .features-section {
+    padding: 60px 0;
+  }
+
+  .activities-section {
+    padding: 40px 0 80px;
+  }
+
+  .activity-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .75rem;
+  }
+}
+
+/*# sourceMappingURL=src_app_styles_home_css_bad6b30c._.single.css.map*/
