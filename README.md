@@ -1,42 +1,356 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚌 Smart School Bus Tracking System
 
-## Getting Started
+Hệ thống theo dõi xe buýt trường học với GPS tracking real-time, quản lý tài xế, phụ huynh và học sinh.
 
-First, run the development server:
+## 🎯 Tính năng chính
+
+- 🔐 **Authentication & Authorization**: JWT-based với 3 roles (Admin, Driver, Parent)
+- 📍 **GPS Tracking**: Theo dõi vị trí xe buýt real-time
+- 👨‍💼 **Admin Dashboard**: Quản lý users, xe buýt, tuyến đường, thống kê
+- 🚗 **Driver Portal**: Cập nhật vị trí, xem tuyến đường, danh sách học sinh
+- 👨‍👩‍👧 **Parent Portal**: Theo dõi vị trí xe con em, quản lý thông tin học sinh
+
+## 🏗️ Kiến trúc hệ thống
+
+```
+smart-school-bus-tracking-system/
+├── frontend/          # Next.js 14 (React)
+│   ├── src/app/
+│   │   ├── admin/     # Admin dashboard
+│   │   ├── driver/    # Driver portal
+│   │   ├── parent/    # Parent portal
+│   │   ├── login/     # Login page
+│   │   └── register/  # Register page
+│   └── package.json
+│
+└── backend/           # Python Flask API
+    ├── app/
+    │   ├── models/    # Database models
+    │   ├── routes/    # API endpoints
+    │   └── utils/     # Helper functions
+    ├── config/        # Configuration
+    ├── app.py         # Main application
+    └── requirements.txt
+```
+
+## 🚀 Công nghệ sử dụng
+
+### Frontend
+- **Framework**: Next.js 14 (React 18)
+- **Styling**: CSS Modules
+- **HTTP Client**: Fetch API
+- **Routing**: Next.js App Router
+
+### Backend
+- **Framework**: Flask 3.0
+- **Database**: SQLAlchemy (SQLite/MySQL/PostgreSQL)
+- **Authentication**: JWT (Flask-JWT-Extended)
+- **Password Hashing**: Bcrypt
+- **CORS**: Flask-CORS
+- **Migration**: Flask-Migrate
+
+## 📦 Cài đặt & Chạy dự án
+
+### 🔧 Yêu cầu hệ thống
+
+- Node.js 18+ 
+- Python 3.9+
+- pip (Python package manager)
+- npm/yarn/pnpm
+
+---
+
+## 🎨 Frontend Setup
+
+### 1. Di chuyển vào thư mục frontend
+
+```bash
+cd frontend
+```
+
+### 2. Cài đặt dependencies
+
+```bash
+npm install
+# hoặc
+yarn install
+# hoặc
+pnpm install
+```
+
+### 3. Chạy development server
 
 ```bash
 npm run dev
-# or
+# hoặc
 yarn dev
-# or
+# hoặc
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Frontend sẽ chạy tại: **http://localhost:3000**
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+### 4. Build cho production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 🐍 Backend Setup
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 1. Di chuyển vào thư mục backend
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+cd backend
+```
 
-## Deploy on Vercel
+### 2. Tạo môi trường ảo (Virtual Environment)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Linux/Mac
+python3 -m venv venv
+source venv/bin/activate
+```
 
+### 3. Cài đặt dependencies
 
-const ADMIN_ACCOUNT = {
-            email: 'admin@smartbus.com',
-            password: 'admin123'
-        };
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Cấu hình môi trường
+
+Sao chép file `.env.example` thành `.env`:
+
+```bash
+# Windows
+copy .env.example .env
+
+# Linux/Mac
+cp .env.example .env
+```
+
+Chỉnh sửa file `.env`:
+
+```env
+# Flask Configuration
+FLASK_APP=app.py
+FLASK_ENV=development
+SECRET_KEY=your-secret-key-here
+JWT_SECRET_KEY=your-jwt-secret-key-here
+
+# Database Configuration
+DATABASE_URL=sqlite:///smartbus.db
+
+# CORS Configuration
+CORS_ORIGINS=http://localhost:3000
+
+# Application Settings
+DEBUG=True
+PORT=5000
+HOST=0.0.0.0
+```
+
+### 5. Khởi tạo database
+
+```bash
+python init_db.py
+```
+
+Lệnh này sẽ tạo database và tài khoản admin mặc định:
+- **Email**: `admin@smartbus.com`
+- **Password**: `admin123`
+
+### 6. Chạy backend server
+
+```bash
+python app.py
+```
+
+Backend API sẽ chạy tại: **http://localhost:5000**
+
+---
+
+## 🌐 Truy cập ứng dụng
+
+| Service | URL | Mô tả |
+|---------|-----|-------|
+| Frontend | http://localhost:3000 | Giao diện người dùng |
+| Backend API | http://localhost:5000 | REST API |
+| API Health Check | http://localhost:5000/health | Kiểm tra trạng thái API |
+
+### 🔑 Tài khoản mặc định
+
+**Admin:**
+- Email: `admin@smartbus.com`
+- Password: `admin123`
+
+---
+
+## 📚 API Documentation
+
+### Authentication Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/register` | Đăng ký tài khoản mới |
+| POST | `/api/auth/login` | Đăng nhập |
+| GET | `/api/auth/me` | Lấy thông tin user hiện tại |
+| POST | `/api/auth/change-password` | Đổi mật khẩu |
+
+### Admin Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/admin/users` | Lấy danh sách users |
+| GET | `/api/admin/users/:id` | Lấy chi tiết user |
+| PUT | `/api/admin/users/:id` | Cập nhật user |
+| DELETE | `/api/admin/users/:id` | Xóa user |
+| GET | `/api/admin/buses` | Lấy danh sách xe buýt |
+| POST | `/api/admin/buses` | Tạo xe buýt mới |
+| PUT | `/api/admin/buses/:id` | Cập nhật xe buýt |
+| DELETE | `/api/admin/buses/:id` | Xóa xe buýt |
+| GET | `/api/admin/routes` | Lấy danh sách tuyến đường |
+| POST | `/api/admin/routes` | Tạo tuyến đường mới |
+| GET | `/api/admin/statistics` | Lấy thống kê hệ thống |
+
+### Driver Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/driver/profile` | Lấy thông tin driver |
+| GET | `/api/driver/assigned-bus` | Lấy xe được phân công |
+| POST | `/api/driver/update-location` | Cập nhật vị trí GPS |
+| GET | `/api/driver/students` | Lấy danh sách học sinh |
+| GET | `/api/driver/route` | Lấy thông tin tuyến đường |
+
+### Parent Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/parent/profile` | Lấy thông tin phụ huynh |
+| GET | `/api/parent/students` | Lấy danh sách con em |
+| POST | `/api/parent/students` | Thêm con mới |
+| PUT | `/api/parent/students/:id` | Cập nhật thông tin con |
+| GET | `/api/parent/bus-location/:bus_id` | Theo dõi vị trí xe |
+
+### 🔐 Authentication
+
+API sử dụng JWT tokens. Sau khi login, gửi token trong header:
+
+```
+Authorization: Bearer <your-token>
+```
+
+### 📝 Ví dụ API Request
+
+```javascript
+// Login
+const response = await fetch('http://localhost:5000/api/auth/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    email: 'admin@smartbus.com',
+    password: 'admin123'
+  })
+});
+
+const { data } = await response.json();
+const token = data.token;
+
+// Use token for authenticated requests
+const users = await fetch('http://localhost:5000/api/admin/users', {
+  headers: { 'Authorization': `Bearer ${token}` }
+});
+```
+
+---
+
+## 📊 Database Schema
+
+### Tables
+
+- **users**: Thông tin người dùng (admin, driver, parent)
+- **drivers**: Thông tin tài xế
+- **parents**: Thông tin phụ huynh
+- **students**: Thông tin học sinh
+- **buses**: Thông tin xe buýt
+- **routes**: Tuyến đường
+- **locations**: Điểm dừng
+- **bus_tracking**: Lịch sử GPS tracking
+
+---
+
+## 🔧 Troubleshooting
+
+### Frontend Issues
+
+**Port 3000 đã được sử dụng:**
+```bash
+# Thay đổi port
+PORT=3001 npm run dev
+```
+
+**Module not found:**
+```bash
+rm -rf node_modules package-lock.json
+npm install
+```
+
+### Backend Issues
+
+**Module not found:**
+```bash
+pip install -r requirements.txt
+```
+
+**Database error:**
+```bash
+python init_db.py
+```
+
+**Port 5000 đã được sử dụng:**
+```bash
+# Windows
+netstat -ano | findstr :5000
+taskkill /PID <PID> /F
+
+# Linux/Mac
+lsof -ti:5000 | xargs kill -9
+```
+
+---
+
+## 📋 Future Improvements
+
+- [ ] WebSocket cho real-time tracking
+- [ ] Push notifications
+- [ ] Mobile app (React Native)
+- [ ] Email notifications
+- [ ] SMS alerts
+- [ ] Advanced analytics dashboard
+- [ ] Attendance tracking
+- [ ] Route optimization
+- [ ] Multi-language support
+- [ ] Dark mode
+
+---
+
+## 👥 Team & Support
+
+**Developer**: Smart School Bus Team  
+**Contact**: support@smartbus.com  
+**GitHub**: [SmartSchoolBus](https://github.com/phandangsang/SmartSchoolBus)
+
+---
+
+## 📄 License
+
+MIT License - Copyright (c) 2025 Smart School Bus Team

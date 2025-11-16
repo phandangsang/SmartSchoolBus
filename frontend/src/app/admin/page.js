@@ -3,42 +3,20 @@
 import { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Table, Badge, Modal, Form } from 'react-bootstrap';
 import Sidebar from '../components/sidebar';
+import { adminAPI } from '../utils/api';
 import '../styles/admin.css';
 
 export default function AdminPage() {
     // Authentication state
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [activeTab, setActiveTab] = useState('students');
+    const [loading, setLoading] = useState(false);
 
-    // Sample data for students
-    const [students, setStudents] = useState([
-        { id: 'HS001', name: 'Nguyễn Văn An', class: '10A1', address: '123 Nguyễn Văn Linh, Quận 7' },
-        { id: 'HS002', name: 'Trần Thị Bình', class: '10A2', address: '456 Lê Văn Việt, Quận 9' },
-        { id: 'HS003', name: 'Lê Văn Cường', class: '11B1', address: '789 Võ Văn Ngân, Thủ Đức' },
-        { id: 'HS004', name: 'Phạm Thị Dung', class: '12C1', address: '321 Điện Biên Phủ, Quận 3' },
-    ]);
-
-    // Sample data for drivers
-    const [drivers, setDrivers] = useState([
-        { id: 'TX001', name: 'Hoàng Văn Mạnh', phone: '0912345678', license: 'B2', bus: 'Xe 01', status: 'active' },
-        { id: 'TX002', name: 'Nguyễn Thị Lan', phone: '0987654321', license: 'B2', bus: 'Xe 02', status: 'active' },
-        { id: 'TX003', name: 'Trần Văn Hùng', phone: '0909123456', license: 'B2', bus: 'Xe 05', status: 'off' },
-    ]);
-
-    // Sample data for buses
-    const [buses, setBuses] = useState([
-        { id: 'XE01', plateNumber: '29A-12345', seats: 45, status: 'running' },
-        { id: 'XE02', plateNumber: '29B-67890', seats: 50, status: 'running' },
-        { id: 'XE05', plateNumber: '29C-11111', seats: 45, status: 'stopped' },
-        { id: 'XE12', plateNumber: '29D-22222', seats: 40, status: 'maintenance' },
-    ]);
-
-    // Sample data for routes
-    const [routes, setRoutes] = useState([
-        { id: 'R001', name: 'SGU - HCMUTE', distance: '15 km', assignedBus: '', assignedDriver: '' },
-        { id: 'R002', name: 'HCMUTE - Đại học Hutech', distance: '12 km', assignedBus: '', assignedDriver: '' },
-        { id: 'R003', name: 'SGU - Đại học Bách Khoa', distance: '18 km', assignedBus: '', assignedDriver: '' },
-    ]);
+    // Data states - will be loaded from backend
+    const [students, setStudents] = useState([]);
+    const [drivers, setDrivers] = useState([]);
+    const [buses, setBuses] = useState([]);
+    const [routes, setRoutes] = useState([]);
 
     // Sample data for schedules
     const [schedules, setSchedules] = useState([
@@ -68,31 +46,131 @@ export default function AdminPage() {
     const [editingRoute, setEditingRoute] = useState(null);
     const [editingSchedule, setEditingSchedule] = useState(null);
 
-    // Kiểm tra đăng nhập
+    // Kiểm tra đăng nhập và load data
     useEffect(() => {
         const userRole = localStorage.getItem('userRole');
         if (userRole === 'admin') {
             setIsAuthenticated(true);
+            loadStudents();
+            loadDrivers();
+            loadBuses();
+            loadRoutes();
         } else {
-            // Chuyển hướng về trang login nếu chưa đăng nhập
             window.location.href = '/login';
         }
     }, []);
 
+    // Load students from backend
+    const loadStudents = async () => {
+        try {
+            setLoading(true);
+            const response = await adminAPI.getStudents();
+            if (response.success) {
+                // Transform data from backend to match frontend format
+                const transformedStudents = response.data.map(s => ({
+                    id: s.id,
+                    name: s.full_name,
+                    class: s.class_name || '',
+                    address: s.school_name || '',
+                    parent_id: s.parent_id
+                }));
+                setStudents(transformedStudents);
+            }
+        } catch (error) {
+            console.error('Failed to load students:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Load drivers from backend
+    const loadDrivers = async () => {
+        try {
+            const response = await adminAPI.getDrivers();
+            if (response.success) {
+                const transformedDrivers = response.data.map(d => ({
+                    id: d.id,
+                    name: d.full_name,
+                    phone: d.phone,
+                    license: d.license_number || '',
+                    status: d.status?.toLowerCase() || 'active'
+                }));
+                setDrivers(transformedDrivers);
+            }
+        } catch (error) {
+            console.error('Failed to load drivers:', error);
+        }
+    };
+
+    // Load buses from backend
+    const loadBuses = async () => {
+        try {
+            const response = await adminAPI.getBuses();
+            if (response.success) {
+                const transformedBuses = response.data.map(b => ({
+                    id: b.id,
+                    plateNumber: b.license_plate,
+                    seats: b.capacity,
+                    status: b.status?.toLowerCase() || 'active'
+                }));
+                setBuses(transformedBuses);
+            }
+        } catch (error) {
+            console.error('Failed to load buses:', error);
+        }
+    };
+
+    // Load routes from backend
+    const loadRoutes = async () => {
+        try {
+            const response = await adminAPI.getRoutes();
+            if (response.success) {
+                const transformedRoutes = response.data.map(r => ({
+                    id: r.id,
+                    name: r.route_name,
+                    distance: r.description || ''
+                }));
+                setRoutes(transformedRoutes);
+            }
+        } catch (error) {
+            console.error('Failed to load routes:', error);
+        }
+    };
+
 
     // Add handlers
-    const handleAddStudent = () => {
-        if (studentForm.name && studentForm.class && studentForm.address) {
-            if (editingStudent) {
-                // Update existing student
-                setStudents(students.map(s => s.id === editingStudent.id ? { ...studentForm, id: editingStudent.id } : s));
-                setEditingStudent(null);
-            } else {
-                // Add new student
-                setStudents([...students, { ...studentForm, id: 'HS' + String(students.length + 1).padStart(3, '0') }]);
+    const handleAddStudent = async () => {
+        if (studentForm.name && studentForm.class) {
+            try {
+                setLoading(true);
+                if (editingStudent) {
+                    // Update existing student
+                    const updateData = {
+                        full_name: studentForm.name,
+                        class_name: studentForm.class,
+                        school_name: studentForm.address
+                    };
+                    await adminAPI.updateStudent(editingStudent.id, updateData);
+                    setEditingStudent(null);
+                } else {
+                    // Add new student - need parent_id
+                    const newStudentData = {
+                        full_name: studentForm.name,
+                        class_name: studentForm.class,
+                        school_name: studentForm.address,
+                        parent_id: 1 // Default parent, should be selected from dropdown
+                    };
+                    await adminAPI.createStudent(newStudentData);
+                }
+                await loadStudents(); // Reload students from backend
+                setStudentForm({ id: '', name: '', class: '', address: '' });
+                setShowStudentModal(false);
+            } catch (error) {
+                console.error('Failed to save student:', error);
+                alert('Lỗi: ' + (error.message || 'Không thể lưu học sinh'));
+            } finally {
+                setLoading(false);
             }
-            setStudentForm({ id: '', name: '', class: '', address: '' });
-            setShowStudentModal(false);
         }
     };
 
@@ -102,24 +180,52 @@ export default function AdminPage() {
         setShowStudentModal(true);
     };
 
-    const handleDeleteStudent = (id) => {
+    const handleDeleteStudent = async (id) => {
         if (window.confirm('Bạn có chắc chắn muốn xóa học sinh này?')) {
-            setStudents(students.filter(s => s.id !== id));
+            try {
+                setLoading(true);
+                await adminAPI.deleteStudent(id);
+                await loadStudents(); // Reload students from backend
+            } catch (error) {
+                console.error('Failed to delete student:', error);
+                alert('Lỗi: ' + (error.message || 'Không thể xóa học sinh'));
+            } finally {
+                setLoading(false);
+            }
         }
     };
 
-    const handleAddDriver = () => {
+    const handleAddDriver = async () => {
         if (driverForm.name && driverForm.phone) {
-            if (editingDriver) {
-                // Update existing driver
-                setDrivers(drivers.map(d => d.id === editingDriver.id ? { ...driverForm, id: editingDriver.id } : d));
-                setEditingDriver(null);
-            } else {
-                // Add new driver
-                setDrivers([...drivers, { ...driverForm, id: 'TX' + String(drivers.length + 1).padStart(3, '0') }]);
+            try {
+                setLoading(true);
+                if (editingDriver) {
+                    const updateData = {
+                        full_name: driverForm.name,
+                        phone: driverForm.phone,
+                        license_number: driverForm.license,
+                        status: driverForm.status?.toUpperCase() || 'ACTIVE'
+                    };
+                    await adminAPI.updateDriver(editingDriver.id, updateData);
+                    setEditingDriver(null);
+                } else {
+                    const newDriverData = {
+                        full_name: driverForm.name,
+                        phone: driverForm.phone,
+                        license_number: driverForm.license,
+                        status: driverForm.status?.toUpperCase() || 'ACTIVE'
+                    };
+                    await adminAPI.createDriver(newDriverData);
+                }
+                await loadDrivers();
+                setDriverForm({ id: '', name: '', phone: '', license: 'B2', bus: '', status: 'active' });
+                setShowDriverModal(false);
+            } catch (error) {
+                console.error('Failed to save driver:', error);
+                alert('Lỗi: ' + (error.message || 'Không thể lưu tài xế'));
+            } finally {
+                setLoading(false);
             }
-            setDriverForm({ id: '', name: '', phone: '', license: 'B2', bus: '', status: 'active' });
-            setShowDriverModal(false);
         }
     };
 
@@ -129,24 +235,51 @@ export default function AdminPage() {
         setShowDriverModal(true);
     };
 
-    const handleDeleteDriver = (id) => {
+    const handleDeleteDriver = async (id) => {
         if (window.confirm('Bạn có chắc chắn muốn xóa tài xế này?')) {
-            setDrivers(drivers.filter(d => d.id !== id));
+            try {
+                setLoading(true);
+                await adminAPI.deleteDriver(id);
+                await loadDrivers();
+            } catch (error) {
+                console.error('Failed to delete driver:', error);
+                alert('Lỗi: ' + (error.message || 'Không thể xóa tài xế'));
+            } finally {
+                setLoading(false);
+            }
         }
     };
 
-    const handleAddBus = () => {
-        if (busForm.id && busForm.plateNumber && busForm.seats) {
-            if (editingBus) {
-                // Update existing bus
-                setBuses(buses.map(b => b.id === editingBus.id ? busForm : b));
-                setEditingBus(null);
-            } else {
-                // Add new bus
-                setBuses([...buses, busForm]);
+    const handleAddBus = async () => {
+        if (busForm.plateNumber && busForm.seats) {
+            try {
+                setLoading(true);
+                if (editingBus) {
+                    const updateData = {
+                        license_plate: busForm.plateNumber,
+                        capacity: parseInt(busForm.seats),
+                        status: busForm.status
+                    };
+                    await adminAPI.updateBus(editingBus.id, updateData);
+                    setEditingBus(null);
+                } else {
+                    const newBusData = {
+                        bus_number: 'BUS' + Date.now(),
+                        license_plate: busForm.plateNumber,
+                        capacity: parseInt(busForm.seats),
+                        status: busForm.status
+                    };
+                    await adminAPI.createBus(newBusData);
+                }
+                await loadBuses();
+                setBusForm({ id: '', plateNumber: '', seats: '', status: 'running' });
+                setShowBusModal(false);
+            } catch (error) {
+                console.error('Failed to save bus:', error);
+                alert('Lỗi: ' + (error.message || 'Không thể lưu xe buýt'));
+            } finally {
+                setLoading(false);
             }
-            setBusForm({ id: '', plateNumber: '', seats: '', status: 'running' });
-            setShowBusModal(false);
         }
     };
 
@@ -156,24 +289,48 @@ export default function AdminPage() {
         setShowBusModal(true);
     };
 
-    const handleDeleteBus = (id) => {
+    const handleDeleteBus = async (id) => {
         if (window.confirm('Bạn có chắc chắn muốn xóa xe buýt này?')) {
-            setBuses(buses.filter(b => b.id !== id));
+            try {
+                setLoading(true);
+                await adminAPI.deleteBus(id);
+                await loadBuses();
+            } catch (error) {
+                console.error('Failed to delete bus:', error);
+                alert('Lỗi: ' + (error.message || 'Không thể xóa xe buýt'));
+            } finally {
+                setLoading(false);
+            }
         }
     };
 
-    const handleAddRoute = () => {
-        if (routeForm.id && routeForm.name && routeForm.distance) {
-            if (editingRoute) {
-                // Update existing route
-                setRoutes(routes.map(r => r.id === editingRoute.id ? routeForm : r));
-                setEditingRoute(null);
-            } else {
-                // Add new route
-                setRoutes([...routes, routeForm]);
+    const handleAddRoute = async () => {
+        if (routeForm.name) {
+            try {
+                setLoading(true);
+                if (editingRoute) {
+                    const updateData = {
+                        route_name: routeForm.name,
+                        description: routeForm.distance
+                    };
+                    await adminAPI.updateRoute(editingRoute.id, updateData);
+                    setEditingRoute(null);
+                } else {
+                    const newRouteData = {
+                        route_name: routeForm.name,
+                        description: routeForm.distance
+                    };
+                    await adminAPI.createRoute(newRouteData);
+                }
+                await loadRoutes();
+                setRouteForm({ id: '', name: '', distance: '' });
+                setShowRouteModal(false);
+            } catch (error) {
+                console.error('Failed to save route:', error);
+                alert('Lỗi: ' + (error.message || 'Không thể lưu tuyến đường'));
+            } finally {
+                setLoading(false);
             }
-            setRouteForm({ id: '', name: '', distance: '' });
-            setShowRouteModal(false);
         }
     };
 
@@ -183,9 +340,18 @@ export default function AdminPage() {
         setShowRouteModal(true);
     };
 
-    const handleDeleteRoute = (id) => {
+    const handleDeleteRoute = async (id) => {
         if (window.confirm('Bạn có chắc chắn muốn xóa tuyến đường này?')) {
-            setRoutes(routes.filter(r => r.id !== id));
+            try {
+                setLoading(true);
+                await adminAPI.deleteRoute(id);
+                await loadRoutes();
+            } catch (error) {
+                console.error('Failed to delete route:', error);
+                alert('Lỗi: ' + (error.message || 'Không thể xóa tuyến đường'));
+            } finally {
+                setLoading(false);
+            }
         }
     };
 

@@ -1,32 +1,22 @@
-// Tài khoản admin mặc định
-export const ADMIN_ACCOUNTS = [
-    {
-        email: 'admin@smartbus.com',
-        password: 'admin123',
-        name: 'Admin',
-        role: 'admin'
-    }
-];
+import { authAPI } from './api';
 
 // Kiểm tra xác thực
 export const checkAuth = () => {
     if (typeof window === 'undefined') return false;
+    const token = localStorage.getItem('token');
     const userRole = localStorage.getItem('userRole');
-    return userRole === 'admin';
+    return !!token && !!userRole;
 };
 
 // Lấy thông tin user
 export const getUserInfo = () => {
-    if (typeof window === 'undefined') return null;
-    return {
-        email: localStorage.getItem('userEmail'),
-        role: localStorage.getItem('userRole')
-    };
+    return authAPI.getCurrentUser();
 };
 
 // Đăng xuất
 export const logout = () => {
-    if (typeof window === 'undefined') return;
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('userEmail');
+    authAPI.logout();
+    if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+    }
 };

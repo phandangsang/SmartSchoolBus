@@ -362,13 +362,11 @@
 }
 
 .badge.succ {
-    background: var(--succ-bg);
-    color: var(--succ);
+    color: #000;
 }
 
 .badge.warn {
-    background: var(--warn-bg);
-    color: var(--warn);
+    color: #000;
 }
 
 /* notifications */

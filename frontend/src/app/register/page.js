@@ -3,17 +3,19 @@
 import { useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
 import Link from 'next/link';
+import { authAPI } from '../utils/api';
 import '../styles/auth.css';
 
 export default function RegisterPage() {
     const [formData, setFormData] = useState({
         fullName: '',
+        username: '',
         email: '',
         phone: '',
         password: '',
         confirmPassword: '',
         role: 'parent',
-        agreeTerms: false
+        licenseNumber: ''
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -43,35 +45,27 @@ export default function RegisterPage() {
 
         setLoading(true);
 
-        // Simulate API call
-        setTimeout(() => {
-            // Lưu tài khoản mới vào localStorage
-            const existingUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-
-            // Kiểm tra email đã tồn tại chưa
-            const emailExists = existingUsers.some(user => user.email === formData.email);
-            if (emailExists) {
-                setError('Email này đã được đăng ký!');
-                setLoading(false);
-                return;
-            }
-
-            // Thêm user mới
-            const newUser = {
-                fullName: formData.fullName,
-                email: formData.email,
-                phone: formData.phone,
+        try {
+            // Gọi API backend để đăng ký
+            const registerData = {
+                username: formData.username,
                 password: formData.password,
-                role: formData.role
+                full_name: formData.fullName,
+                phone: formData.phone,
+                email: formData.email,
+                role: formData.role,
+                ...(formData.role === 'driver' && formData.licenseNumber && { license_number: formData.licenseNumber })
             };
-            existingUsers.push(newUser);
-            localStorage.setItem('registeredUsers', JSON.stringify(existingUsers));
+
+            await authAPI.register(registerData);
 
             // Redirect to login page
             alert('Đăng ký thành công! Vui lòng đăng nhập.');
             window.location.href = '/login';
+        } catch (err) {
+            setError(err.message || 'Đăng ký thất bại. Vui lòng thử lại.');
             setLoading(false);
-        }, 1000);
+        }
     };
 
     return (
@@ -89,92 +83,99 @@ export default function RegisterPage() {
 
                                 <Form onSubmit={handleSubmit}>
                                     <Form.Group className="mb-3">
-                                        <Form.Label>Họ và tên <span className="text-danger">*</span></Form.Label>
+                                        <Form.Label>Họ và tên </Form.Label>
                                         <Form.Control
                                             type="text"
                                             name="fullName"
                                             placeholder="Nhập họ và tên"
-                                            // autoComplete="off"
                                             value={formData.fullName}
                                             onChange={handleChange}
                                             required
+                                            disabled={loading}
                                         />
                                     </Form.Group>
 
-                                    <Row>
-                                        <Col md={6}>
-                                            <Form.Group className="mb-3">
-                                                <Form.Label>Email <span className="text-danger">*</span></Form.Label>
-                                                <Form.Control
-                                                    type="email"
-                                                    name="email"
-                                                    placeholder="Nhập email"
-                                                    // autoComplete="off"
-                                                    value={formData.email}
-                                                    onChange={handleChange}
-                                                    required
-                                                />
-                                            </Form.Group>
-                                        </Col>
-                                        <Col md={6}>
-                                            <Form.Group className="mb-3">
-                                                <Form.Label>Số điện thoại <span className="text-danger">*</span></Form.Label>
-                                                <Form.Control
-                                                    type="tel"
-                                                    name="phone"
-                                                    placeholder="Nhập số điện thoại"
-                                                    // autoComplete="off"
-                                                    value={formData.phone}
-                                                    onChange={handleChange}
-                                                    required
-                                                />
-                                            </Form.Group>
-                                        </Col>
-                                    </Row>
+                                    <Form.Group className="mb-3">
+                                        <Form.Label>Tên đăng nhập </Form.Label>
+                                        <Form.Control
+                                            type="text"
+                                            name="username"
+                                            placeholder="Nhập tên đăng nhập"
+                                            value={formData.username}
+                                            onChange={handleChange}
+                                            required
+                                            disabled={loading}
+                                        />
+                                    </Form.Group>
 
                                     <Form.Group className="mb-3">
-                                        <Form.Label>Vai trò <span className="text-danger">*</span></Form.Label>
+                                        <Form.Label>Số điện thoại </Form.Label>
+                                        <Form.Control
+                                            type="tel"
+                                            name="phone"
+                                            placeholder="Nhập số điện thoại"
+                                            value={formData.phone}
+                                            onChange={handleChange}
+                                            required
+                                            disabled={loading}
+                                        />
+                                    </Form.Group>
+
+                                    <Form.Group className="mb-3">
+                                        <Form.Label>Vai trò </Form.Label>
                                         <Form.Select
                                             name="role"
                                             value={formData.role}
                                             onChange={handleChange}
                                             required
+                                            disabled={loading}
                                         >
                                             <option value="parent">Phụ huynh</option>
                                             <option value="driver">Tài xế</option>
                                         </Form.Select>
                                     </Form.Group>
 
+
+
                                     <Row>
                                         <Col md={6}>
                                             <Form.Group className="mb-3">
-                                                <Form.Label>Mật khẩu <span className="text-danger">*</span></Form.Label>
+                                                <Form.Label>Mật khẩu </Form.Label>
                                                 <Form.Control
                                                     type="password"
                                                     name="password"
-                                                    // autoComplete="off"
                                                     placeholder="Nhập mật khẩu"
                                                     value={formData.password}
                                                     onChange={handleChange}
                                                     required
+                                                    disabled={loading}
                                                 />
                                             </Form.Group>
                                         </Col>
                                         <Col md={6}>
                                             <Form.Group className="mb-3">
-                                                <Form.Label>Xác nhận mật khẩu <span className="text-danger">*</span></Form.Label>
+                                                <Form.Label>Xác nhận mật khẩu </Form.Label>
                                                 <Form.Control
                                                     type="password"
                                                     name="confirmPassword"
-                                                    // autoComplete="off"
                                                     placeholder="Nhập lại mật khẩu"
                                                     value={formData.confirmPassword}
                                                     onChange={handleChange}
                                                     required
+                                                    disabled={loading}
                                                 />
                                             </Form.Group>
                                         </Col>
                                     </Row>
+
+                                    <Button
+                                        variant="primary"
+                                        type="submit"
+                                        className="w-100 mb-3"
+                                        disabled={loading}
+                                    >
+                                        Đăng ký
+                                    </Button>
 
 
                                     <div className="text-center">

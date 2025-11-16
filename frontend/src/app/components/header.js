@@ -11,22 +11,22 @@ export default function Header() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
-        const email = localStorage.getItem('userEmail');
+        const token = localStorage.getItem('token');
         const role = localStorage.getItem('userRole');
         const name = localStorage.getItem('userName');
 
-        if (email && role) {
-            setUserEmail(email);
+        if (token && role) {
             setUserRole(role);
-            setUserName(name || email);
+            setUserName(name || 'User');
             setIsLoggedIn(true);
         }
     }, []);
 
     const handleLogout = () => {
+        localStorage.removeItem('token');
         localStorage.removeItem('userRole');
-        localStorage.removeItem('userEmail');
         localStorage.removeItem('userName');
+        localStorage.removeItem('userId');
         window.location.href = '/login';
     };
 

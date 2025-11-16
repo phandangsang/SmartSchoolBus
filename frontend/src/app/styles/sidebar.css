@@ -71,9 +71,9 @@
 }
 
 .sidebar-nav-item.active {
-    background: linear-gradient(90deg, rgba(255, 119, 71, 0.15) 0%, transparent 100%);
+    background: #4a5568;
     color: white;
-    border-left-color: #ff7747;
+
 }
 
 .sidebar-nav-icon {

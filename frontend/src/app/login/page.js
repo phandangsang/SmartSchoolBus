@@ -3,11 +3,12 @@
 import { useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
 import Link from 'next/link';
+import { authAPI } from '../utils/api';
 import '../styles/auth.css';
 
 export default function LoginPage() {
     const [formData, setFormData] = useState({
-        email: '',
+        username: '',
         password: '',
         rememberMe: false
     });
@@ -25,50 +26,32 @@ export default function LoginPage() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setLoading(true);
 
-        // Tài khoản admin mặc định
-        const ADMIN_ACCOUNT = {
-            email: 'admin@smartbus.com',
-            password: 'admin123'
-        };
-
-        if (!formData.email || !formData.password) {
+        if (!formData.username || !formData.password) {
             setError('Vui lòng điền đầy đủ thông tin');
+            setLoading(false);
             return;
         }
 
-        // Kiểm tra tài khoản admin
-        if (formData.email === ADMIN_ACCOUNT.email && formData.password === ADMIN_ACCOUNT.password) {
-            // Lưu thông tin đăng nhập
-            localStorage.setItem('userRole', 'admin');
-            localStorage.setItem('userEmail', formData.email);
-            localStorage.setItem('userName', 'Admin');
-
-            // Chuyển hướng đến trang admin
-            window.location.href = '/admin';
-            return;
-        }
-
-        // Kiểm tra tài khoản đăng ký
-        const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-        const user = registeredUsers.find(u => u.email === formData.email && u.password === formData.password);
-
-        if (user) {
-            // Lưu thông tin đăng nhập
-            localStorage.setItem('userRole', user.role);
-            localStorage.setItem('userEmail', user.email);
-            localStorage.setItem('userName', user.fullName);
+        try {
+            // Gọi API backend để đăng nhập
+            const response = await authAPI.login(formData.username, formData.password);
 
             // Chuyển hướng tùy theo role
-            if (user.role === 'driver') {
-                window.location.href = '/driver'; // Trang tài xế
-            } else if (user.role === 'parent') {
-                window.location.href = '/parent'; // Trang phụ huynh
+            const role = response.user.role.toLowerCase();
+            if (role === 'admin') {
+                window.location.href = '/admin';
+            } else if (role === 'driver') {
+                window.location.href = '/driver';
+            } else if (role === 'parent') {
+                window.location.href = '/parent';
             } else {
-                window.location.href = '/'; // Trang chủ
+                window.location.href = '/';
             }
-        } else {
-            setError('Email hoặc mật khẩu không chính xác!');
+        } catch (err) {
+            setError(err.message || 'Tên đăng nhập hoặc mật khẩu không chính xác!');
+            setLoading(false);
         }
     };
 
@@ -88,15 +71,15 @@ export default function LoginPage() {
 
                                 <Form onSubmit={handleSubmit}>
                                     <Form.Group className="mb-3">
-                                        <Form.Label>Email</Form.Label>
+                                        <Form.Label>Tên đăng nhập</Form.Label>
                                         <Form.Control
-                                            type="email"
-                                            name="email"
-                                            // autoComplete="off"
-                                            placeholder="Nhập email của bạn"
-                                            value={formData.email}
+                                            type="text"
+                                            name="username"
+                                            placeholder="Nhập tên đăng nhập"
+                                            value={formData.username}
                                             onChange={handleChange}
                                             required
+                                            disabled={loading}
                                         />
                                     </Form.Group>
 
@@ -105,11 +88,11 @@ export default function LoginPage() {
                                         <Form.Control
                                             type="password"
                                             name="password"
-                                            // autoComplete="off"
                                             placeholder="Nhập mật khẩu"
                                             value={formData.password}
                                             onChange={handleChange}
                                             required
+                                            disabled={loading}
                                         />
                                     </Form.Group>
 
@@ -130,9 +113,15 @@ export default function LoginPage() {
                                         variant="primary"
                                         type="submit"
                                         className="w-100 mb-3"
+                                        disabled={loading}
                                     >
                                         Đăng nhập
                                     </Button>
+
+                                    <div className="text-center mb-3">
+                                        <small className="text-muted">
+                                        </small>
+                                    </div>
 
                                     <div className="text-center">
                                         <span className="text-muted">Chưa có tài khoản? </span>
