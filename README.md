@@ -20,7 +20,7 @@ smart-school-bus-tracking-system/
 │   │   ├── driver/    # Driver portal
 │   │   ├── parent/    # Parent portal
 │   │   ├── login/     # Login page
-│   │   └── register/  # Register page
+│   │   └── register/  # Register page (removed - registration disabled; admin creates accounts)
 │   └── package.json
 │
 └── backend/           # Python Flask API
@@ -165,7 +165,7 @@ python init_db.py
 ```
 
 Lệnh này sẽ tạo database và tài khoản admin mặc định:
-- **tendangnhap**: `admin`
+- **Username**: `admin`
 - **Password**: `123456`
 
 ### 6. Chạy backend server
@@ -189,8 +189,10 @@ Backend API sẽ chạy tại: **http://localhost:5000**
 ### 🔑 Tài khoản mặc định
 
 **Admin:**
-- Email: `admin@smartbus.com`
-- Password: `admin123`
+- Username: `admin`
+- Password: `123456`
+
+Lưu ý: Tính năng đăng ký công khai đã bị vô hiệu hóa; tất cả tài khoản PARENT/DRIVER phải do Admin tạo qua Dashboard hoặc API `POST /api/admin/users`.
 
 ---
 
@@ -200,7 +202,7 @@ Backend API sẽ chạy tại: **http://localhost:5000**
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/api/auth/register` | Đăng ký tài khoản mới |
+ | POST | `/api/auth/register` | Đăng ký tài khoản mới (disabled — admin tạo tài khoản) |
 | POST | `/api/auth/login` | Đăng nhập |
 | GET | `/api/auth/me` | Lấy thông tin user hiện tại |
 | POST | `/api/auth/change-password` | Đổi mật khẩu |

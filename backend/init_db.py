@@ -15,21 +15,22 @@ if __name__ == '__main__':
         db.create_all()
         print("✓ Database tables created successfully!")
         
-        # Create default admin account
+        # Create default admin account (username/password)
         from app.models import User
-        admin = User.query.filter_by(email='admin@smartbus.com').first()
+        admin = User.query.filter_by(Username='admin').first()
         if not admin:
             admin = User(
-                email='admin@smartbus.com',
-                full_name='System Administrator',
-                role='admin',
-                is_active=True
+                Username='admin',
+                FullName='System Administrator',
+                Role='admin',
+                IsActive=True
             )
-            admin.set_password('admin123')
+            # set default password
+            admin.set_password('123456')
             db.session.add(admin)
             db.session.commit()
             print("✓ Default admin account created!")
-            print("  Email: admin@smartbus.com")
-            print("  Password: admin123")
+            print("  Username: admin")
+            print("  Password: 123456")
         else:
             print("✓ Admin account already exists")
