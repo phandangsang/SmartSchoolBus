@@ -14,6 +14,7 @@ export default function AdminPage() {
 
     // Data states - will be loaded from backend
     const [students, setStudents] = useState([]);
+    const [parents, setParents] = useState([]);
     const [drivers, setDrivers] = useState([]);
     const [buses, setBuses] = useState([]);
     const [routes, setRoutes] = useState([]);
@@ -27,6 +28,7 @@ export default function AdminPage() {
 
     // Modal states
     const [showStudentModal, setShowStudentModal] = useState(false);
+    const [showParentModal, setShowParentModal] = useState(false);
     const [showDriverModal, setShowDriverModal] = useState(false);
     const [showBusModal, setShowBusModal] = useState(false);
     const [showRouteModal, setShowRouteModal] = useState(false);
@@ -34,6 +36,7 @@ export default function AdminPage() {
 
     // Form data states
     const [studentForm, setStudentForm] = useState({ id: '', name: '', class: '', address: '' });
+    const [parentForm, setParentForm] = useState({ id: '', name: '', phone: '', email: '', address: '', username: '', password: '' });
     const [driverForm, setDriverForm] = useState({ id: '', name: '', phone: '', license: 'B2', bus: '', status: 'active', username: '', password: '' });
     const [busForm, setBusForm] = useState({ id: '', plateNumber: '', seats: '', status: 'running' });
     const [routeForm, setRouteForm] = useState({ id: '', name: '', distance: '' });
@@ -41,6 +44,7 @@ export default function AdminPage() {
 
     // Edit mode states
     const [editingStudent, setEditingStudent] = useState(null);
+    const [editingParent, setEditingParent] = useState(null);
     const [editingDriver, setEditingDriver] = useState(null);
     const [editingBus, setEditingBus] = useState(null);
     const [editingRoute, setEditingRoute] = useState(null);
@@ -52,6 +56,7 @@ export default function AdminPage() {
         if (userRole === 'admin') {
             setIsAuthenticated(true);
             loadStudents();
+            loadParents();
             loadDrivers();
             loadBuses();
             loadRoutes();
@@ -100,6 +105,26 @@ export default function AdminPage() {
             }
         } catch (error) {
             console.error('Failed to load drivers:', error);
+        }
+    };
+
+    // Load parents from backend
+    const loadParents = async () => {
+        try {
+            const response = await adminAPI.getParents();
+            if (response.success) {
+                const transformedParents = response.data.map(p => ({
+                    id: p.id,
+                    name: p.full_name,
+                    phone: p.phone,
+                    email: p.email || '',
+                    address: p.address || '',
+                    user: p.user
+                }));
+                setParents(transformedParents);
+            }
+        } catch (error) {
+            console.error('Failed to load parents:', error);
         }
     };
 
@@ -168,7 +193,8 @@ export default function AdminPage() {
                 setShowStudentModal(false);
             } catch (error) {
                 console.error('Failed to save student:', error);
-                alert('Lỗi: ' + (error.message || 'Không thể lưu học sinh'));
+                const errorMessage = error.response?.data?.message || error.message || 'Không thể lưu học sinh';
+                alert('Lỗi: ' + errorMessage);
             } finally {
                 setLoading(false);
             }
@@ -262,6 +288,80 @@ export default function AdminPage() {
             } catch (error) {
                 console.error('Failed to delete driver:', error);
                 alert('Lỗi: ' + (error.message || 'Không thể xóa tài xế'));
+            } finally {
+                setLoading(false);
+            }
+        }
+    };
+
+    // Parent handlers
+    const handleAddParent = async () => {
+        if (parentForm.name && parentForm.phone) {
+            try {
+                setLoading(true);
+                if (editingParent) {
+                    const updateData = {
+                        full_name: parentForm.name,
+                        phone: parentForm.phone,
+                        email: parentForm.email,
+                        address: parentForm.address
+                    };
+                    // Nếu có password mới, thêm vào data để cập nhật
+                    if (parentForm.password) {
+                        updateData.password = parentForm.password;
+                    }
+                    await adminAPI.updateParent(editingParent.id, updateData);
+                    setEditingParent(null);
+                } else {
+                    // Tạo mới parent với tài khoản
+                    if (!parentForm.username || !parentForm.password) {
+                        alert('Vui lòng nhập tên đăng nhập và mật khẩu');
+                        setLoading(false);
+                        return;
+                    }
+                    const newParentData = {
+                        username: parentForm.username,
+                        password: parentForm.password,
+                        full_name: parentForm.name,
+                        phone: parentForm.phone,
+                        email: parentForm.email,
+                        address: parentForm.address,
+                        role: 'PARENT'
+                    };
+                    await adminAPI.createUser(newParentData);
+                }
+                await loadParents();
+                setParentForm({ id: '', name: '', phone: '', email: '', address: '', username: '', password: '' });
+                setShowParentModal(false);
+            } catch (error) {
+                console.error('Failed to save parent:', error);
+                const errorMessage = error.response?.data?.message || error.message || 'Không thể lưu phụ huynh';
+                alert('Lỗi: ' + errorMessage);
+            } finally {
+                setLoading(false);
+            }
+        }
+    };
+
+    const handleEditParent = (parent) => {
+        setEditingParent(parent);
+        setParentForm({
+            ...parent,
+            username: parent.user?.username || '',
+            password: '' // Reset password field khi edit
+        });
+        setShowParentModal(true);
+    };
+
+    const handleDeleteParent = async (id) => {
+        if (window.confirm('Bạn có chắc chắn muốn xóa phụ huynh này?')) {
+            try {
+                setLoading(true);
+                await adminAPI.deleteParent(id);
+                await loadParents();
+            } catch (error) {
+                console.error('Failed to delete parent:', error);
+                alert('Lỗi: ' + (error.message || 'Không thể xóa phụ huynh'));
             } finally {
                 setLoading(false);
             }
@@ -464,6 +564,55 @@ export default function AdminPage() {
                                                         Sửa
                                                     </Button>
                                                     <Button variant="link" size="sm" className="p-0 text-danger" onClick={() => handleDeleteStudent(student.id)}>
+                                                        Xóa
+                                                    </Button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </Table>
+                            </Card.Body>
+                        </Card>
+                    </>
+                );
+
+            case 'parents':
+                return (
+                    <>
+                        <div className="admin-header mb-4">
+                            <h1 className="admin-title">Quản lý phụ huynh</h1>
+                            <p className="admin-subtitle">Danh sách phụ huynh trong hệ thống</p>
+                        </div>
+                        <div className="d-flex justify-content-between align-items-center mb-3">
+                            <h5 className="mb-0">Danh sách phụ huynh</h5>
+                            <Button variant="primary" size="sm" onClick={() => setShowParentModal(true)}>+ Thêm phụ huynh</Button>
+                        </div>
+                        <Card>
+                            <Card.Body>
+                                <Table hover className="admin-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Mã PH</th>
+                                            <th>Họ tên</th>
+                                            <th>SĐT</th>
+                                            <th>Email</th>
+                                            <th>Địa chỉ</th>
+                                            <th>Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {parents.map((parent) => (
+                                            <tr key={parent.id}>
+                                                <td>{parent.id}</td>
+                                                <td>{parent.name}</td>
+                                                <td>{parent.phone}</td>
+                                                <td>{parent.email}</td>
+                                                <td>{parent.address}</td>
+                                                <td>
+                                                    <Button variant="link" size="sm" className="p-0 me-2 text-primary" onClick={() => handleEditParent(parent)}>
+                                                        Sửa
+                                                    </Button>
+                                                    <Button variant="link" size="sm" className="p-0 text-danger" onClick={() => handleDeleteParent(parent.id)}>
                                                         Xóa
                                                     </Button>
                                                 </td>
@@ -812,16 +961,16 @@ export default function AdminPage() {
                             <Form.Label>Lớp </Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder=""
+                                placeholder="Ví dụ: 10A1"
                                 value={studentForm.class || ''}
                                 onChange={(e) => setStudentForm({ ...studentForm, class: e.target.value })}
                             />
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>Địa chỉ </Form.Label>
+                            <Form.Label>Trường</Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder=""
+                                placeholder="Tên trường học"
                                 value={studentForm.address || ''}
                                 onChange={(e) => setStudentForm({ ...studentForm, address: e.target.value })}
                             />
@@ -833,7 +982,7 @@ export default function AdminPage() {
                         Hủy
                     </Button>
                     <Button variant="primary" onClick={handleAddStudent}>
-                        Thêm học sinh
+                        {editingStudent ? 'Cập nhật' : 'Thêm học sinh'}
                     </Button>
                 </Modal.Footer>
             </Modal>
@@ -922,6 +1071,82 @@ export default function AdminPage() {
                     </Button>
                     <Button variant="primary" onClick={handleAddDriver}>
                         {editingDriver ? 'Cập nhật' : 'Thêm tài xế'}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            {/* Modal Thêm Phụ huynh */}
+            <Modal show={showParentModal} onHide={() => { setShowParentModal(false); setEditingParent(null); setParentForm({ id: '', name: '', phone: '', email: '', address: '', username: '', password: '' }); }}>
+                <Modal.Header closeButton>
+                    <Modal.Title>{editingParent ? 'Sửa thông tin phụ huynh' : 'Thêm phụ huynh mới'}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Tên đăng nhập
+                            </Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Nhập tên đăng nhập"
+                                value={parentForm.username}
+                                onChange={(e) => setParentForm({ ...parentForm, username: e.target.value })}
+                                disabled={editingParent}
+                            />
+                            {editingParent && <Form.Text className="text-muted">Tên đăng nhập không thể thay đổi</Form.Text>}
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Mật khẩu {!editingParent}</Form.Label>
+                            <Form.Control
+                                type="password"
+                                placeholder={editingParent ? "Để trống nếu không đổi mật khẩu" : "Nhập mật khẩu"}
+                                value={parentForm.password}
+                                onChange={(e) => setParentForm({ ...parentForm, password: e.target.value })}
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Họ và tên </Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder=""
+                                value={parentForm.name}
+                                onChange={(e) => setParentForm({ ...parentForm, name: e.target.value })}
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Số điện thoại </Form.Label>
+                            <Form.Control
+                                type="tel"
+                                placeholder="Nhập số điện thoại"
+                                value={parentForm.phone}
+                                onChange={(e) => setParentForm({ ...parentForm, phone: e.target.value })}
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Email</Form.Label>
+                            <Form.Control
+                                type="email"
+                                placeholder="Nhập email"
+                                value={parentForm.email}
+                                onChange={(e) => setParentForm({ ...parentForm, email: e.target.value })}
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Địa chỉ</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Nhập địa chỉ"
+                                value={parentForm.address}
+                                onChange={(e) => setParentForm({ ...parentForm, address: e.target.value })}
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowParentModal(false)}>
+                        Hủy
+                    </Button>
+                    <Button variant="primary" onClick={handleAddParent}>
+                        {editingParent ? 'Cập nhật' : 'Thêm phụ huynh'}
                     </Button>
                 </Modal.Footer>
             </Modal>

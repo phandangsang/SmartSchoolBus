@@ -8,6 +8,7 @@ export default function Sidebar({ activeTab, onTabChange, userRole = 'admin' }) 
     // Menu cho Admin
     const adminMenuItems = [
         { id: 'students', label: 'Quản lý học sinh' },
+        { id: 'parents', label: 'Quản lý phụ huynh' },
         { id: 'drivers', label: 'Quản lý tài xế' },
         { id: 'buses', label: 'Quản lý xe buýt' },
         { id: 'routes', label: 'Quản lý tuyến đường' },

@@ -111,6 +111,16 @@ export const adminAPI = {
         method: 'DELETE',
     }),
 
+    // Parents
+    getParents: () => fetchAPI('/admin/parents'),
+    updateParent: (parentId, parentData) => fetchAPI(`/admin/parents/${parentId}`, {
+        method: 'PUT',
+        body: JSON.stringify(parentData),
+    }),
+    deleteParent: (parentId) => fetchAPI(`/admin/parents/${parentId}`, {
+        method: 'DELETE',
+    }),
+
     // Buses
     getBuses: () => fetchAPI('/admin/buses'),
     createBus: (busData) => fetchAPI('/admin/buses', {

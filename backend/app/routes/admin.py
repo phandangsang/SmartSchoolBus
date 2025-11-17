@@ -112,6 +112,8 @@ def create_user():
         db.session.commit()
         
         # Create corresponding Parent or Driver record
+        parent_id = None
+        driver_id = None
         if data['role'].upper() == 'PARENT':
             parent = Parent(
                 UserID=user.UserID,
@@ -121,6 +123,8 @@ def create_user():
                 Address=data.get('address')
             )
             db.session.add(parent)
+            db.session.commit()
+            parent_id = parent.ParentID
         elif data['role'].upper() == 'DRIVER':
             driver = Driver(
                 UserID=user.UserID,
@@ -130,9 +134,16 @@ def create_user():
                 Status='ACTIVE'
             )
             db.session.add(driver)
+            db.session.commit()
+            driver_id = driver.DriverID
         
-        db.session.commit()
-        return success_response(data=user.to_dict(), message='User created successfully', status=201)
+        response_data = user.to_dict()
+        if parent_id:
+            response_data['parent_id'] = parent_id
+        if driver_id:
+            response_data['driver_id'] = driver_id
+            
+        return success_response(data=response_data, message='User created successfully', status=201)
     except Exception as e:
         db.session.rollback()
         return error_response(f'Failed to create user: {str(e)}', status=500)
@@ -221,6 +232,66 @@ def delete_driver(driver_id):
     except Exception as e:
         db.session.rollback()
         return error_response(f'Failed to delete driver: {str(e)}', status=500)
+
+# Parent Management
+@admin_bp.route('/parents', methods=['GET'])
+@role_required('admin')
+def get_all_parents():
+    """Get all parents."""
+    try:
+        parents = Parent.query.all()
+        return success_response(data=[parent.to_dict() for parent in parents])
+    except Exception as e:
+        return error_response(f'Failed to get parents: {str(e)}', status=500)
+
+@admin_bp.route('/parents/<int:parent_id>', methods=['PUT'])
+@role_required('admin')
+def update_parent(parent_id):
+    """Update parent information."""
+    try:
+        parent = Parent.query.get(parent_id)
+        if not parent:
+            return error_response('Parent not found', status=404)
+        
+        data = request.get_json()
+        
+        if 'full_name' in data:
+            parent.FullName = data['full_name']
+        if 'phone' in data:
+            parent.Phone = data['phone']
+        if 'email' in data:
+            parent.Email = data['email']
+        if 'address' in data:
+            parent.Address = data['address']
+        
+        # Nếu có password, cập nhật mật khẩu cho user tương ứng
+        if 'password' in data and data['password']:
+            if parent.UserID:
+                user = User.query.get(parent.UserID)
+                if user:
+                    user.PasswordHash = data['password']
+        
+        db.session.commit()
+        return success_response(data=parent.to_dict(), message='Parent updated successfully')
+    except Exception as e:
+        db.session.rollback()
+        return error_response(f'Failed to update parent: {str(e)}', status=500)
+
+@admin_bp.route('/parents/<int:parent_id>', methods=['DELETE'])
+@role_required('admin')
+def delete_parent(parent_id):
+    """Delete parent."""
+    try:
+        parent = Parent.query.get(parent_id)
+        if not parent:
+            return error_response('Parent not found', status=404)
+        
+        db.session.delete(parent)
+        db.session.commit()
+        return success_response(message='Parent deleted successfully')
+    except Exception as e:
+        db.session.rollback()
+        return error_response(f'Failed to delete parent: {str(e)}', status=500)
 
 # Bus Management
 @admin_bp.route('/buses', methods=['GET'])
