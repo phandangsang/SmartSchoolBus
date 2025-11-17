@@ -512,6 +512,13 @@ def update_student(student_id):
             student.ClassName = data['class_name']
         if 'school_name' in data:
             student.SchoolName = data['school_name']
+        # Allow updating parent relationship
+        if 'parent_id' in data:
+            # validate parent exists
+            parent = Parent.query.get(data['parent_id'])
+            if not parent:
+                return error_response('Parent not found', status=404)
+            student.ParentID = data['parent_id']
         if 'is_active' in data:
             student.IsActive = data['is_active']
         
