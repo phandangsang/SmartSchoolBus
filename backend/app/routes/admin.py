@@ -76,6 +76,67 @@ def delete_user(user_id):
         db.session.rollback()
         return error_response(f'Failed to delete user: {str(e)}', status=500)
 
+@admin_bp.route('/users', methods=['POST'])
+@role_required('admin')
+def create_user():
+    """Create a new user account (for parent or driver)."""
+    try:
+        from app import bcrypt
+        data = request.get_json()
+        required_fields = ['username', 'password', 'full_name', 'phone', 'role']
+        is_valid, error_msg = validate_required_fields(data, required_fields)
+        if not is_valid:
+            return error_response(error_msg)
+        
+        # Validate role
+        if data['role'].upper() not in ['PARENT', 'DRIVER']:
+            return error_response('Role must be PARENT or DRIVER')
+        
+        # Check if username already exists
+        existing_user = User.query.filter_by(Username=data['username']).first()
+        if existing_user:
+            return error_response('Username already exists', status=400)
+        
+        # Create user
+        user = User(
+            Username=data['username'],
+            PasswordHash=data['password'],  # Will be hashed by trigger in DB or you can hash here
+            FullName=data['full_name'],
+            Phone=data['phone'],
+            Email=data.get('email'),
+            Role=data['role'].upper(),
+            IsActive=data.get('is_active', True)
+        )
+        
+        db.session.add(user)
+        db.session.commit()
+        
+        # Create corresponding Parent or Driver record
+        if data['role'].upper() == 'PARENT':
+            parent = Parent(
+                UserID=user.UserID,
+                FullName=data['full_name'],
+                Phone=data['phone'],
+                Email=data.get('email'),
+                Address=data.get('address')
+            )
+            db.session.add(parent)
+        elif data['role'].upper() == 'DRIVER':
+            driver = Driver(
+                UserID=user.UserID,
+                FullName=data['full_name'],
+                Phone=data['phone'],
+                LicenseNumber=data.get('license_number', ''),
+                Status='ACTIVE'
+            )
+            db.session.add(driver)
+        
+        db.session.commit()
+        return success_response(data=user.to_dict(), message='User created successfully', status=201)
+    except Exception as e:
+        db.session.rollback()
+        return error_response(f'Failed to create user: {str(e)}', status=500)
+
 # Driver Management
 @admin_bp.route('/drivers', methods=['GET'])
 @role_required('admin')
@@ -132,6 +193,13 @@ def update_driver(driver_id):
         if 'status' in data:
             driver.Status = data['status']
         
+        # Nếu có password, cập nhật mật khẩu cho user tương ứng
+        if 'password' in data and data['password']:
+            if driver.UserID:
+                user = User.query.get(driver.UserID)
+                if user:
+                    user.PasswordHash = data['password']  # Will be hashed by trigger or hash here
+        
         db.session.commit()
         return success_response(data=driver.to_dict(), message='Driver updated successfully')
     except Exception as e:
@@ -171,19 +239,17 @@ def create_bus():
     """Create a new bus."""
     try:
         data = request.get_json()
-        required_fields = ['bus_number', 'license_plate', 'capacity']
+        required_fields = ['plate_number', 'capacity']
         is_valid, error_msg = validate_required_fields(data, required_fields)
         if not is_valid:
             return error_response(error_msg)
         
         bus = Bus(
-            bus_number=data['bus_number'],
-            license_plate=data['license_plate'],
-            capacity=data['capacity'],
-            model=data.get('model'),
-            year=data.get('year'),
-            status=data.get('status', 'active'),
-            route_id=data.get('route_id')
+            PlateNumber=data['plate_number'],
+            Capacity=data['capacity'],
+            Model=data.get('model'),
+            Status=data.get('status', 'ACTIVE'),
+            Note=data.get('note')
         )
         
         db.session.add(bus)
@@ -205,20 +271,16 @@ def update_bus(bus_id):
         data = request.get_json()
         
         # Update fields
-        if 'bus_number' in data:
-            bus.bus_number = data['bus_number']
-        if 'license_plate' in data:
-            bus.license_plate = data['license_plate']
+        if 'plate_number' in data:
+            bus.PlateNumber = data['plate_number']
         if 'capacity' in data:
-            bus.capacity = data['capacity']
+            bus.Capacity = data['capacity']
         if 'model' in data:
-            bus.model = data['model']
-        if 'year' in data:
-            bus.year = data['year']
+            bus.Model = data['model']
         if 'status' in data:
-            bus.status = data['status']
-        if 'route_id' in data:
-            bus.route_id = data['route_id']
+            bus.Status = data['status']
+        if 'note' in data:
+            bus.Note = data['note']
         
         db.session.commit()
         return success_response(data=bus.to_dict(), message='Bus updated successfully')
@@ -265,9 +327,9 @@ def create_route():
             return error_response(error_msg)
         
         route = Route(
-            route_name=data['route_name'],
-            description=data.get('description'),
-            is_active=data.get('is_active', True)
+            RouteName=data['route_name'],
+            Description=data.get('description'),
+            Status=data.get('status', 'ACTIVE')
         )
         
         db.session.add(route)
@@ -276,6 +338,46 @@ def create_route():
     except Exception as e:
         db.session.rollback()
         return error_response(f'Failed to create route: {str(e)}', status=500)
+
+@admin_bp.route('/routes/<int:route_id>', methods=['PUT'])
+@role_required('admin')
+def update_route(route_id):
+    """Update route information."""
+    try:
+        route = Route.query.get(route_id)
+        if not route:
+            return error_response('Route not found', status=404)
+        
+        data = request.get_json()
+        
+        if 'route_name' in data:
+            route.RouteName = data['route_name']
+        if 'description' in data:
+            route.Description = data['description']
+        if 'status' in data:
+            route.Status = data['status']
+        
+        db.session.commit()
+        return success_response(data=route.to_dict(), message='Route updated successfully')
+    except Exception as e:
+        db.session.rollback()
+        return error_response(f'Failed to update route: {str(e)}', status=500)
+
+@admin_bp.route('/routes/<int:route_id>', methods=['DELETE'])
+@role_required('admin')
+def delete_route(route_id):
+    """Delete route."""
+    try:
+        route = Route.query.get(route_id)
+        if not route:
+            return error_response('Route not found', status=404)
+        
+        db.session.delete(route)
+        db.session.commit()
+        return success_response(message='Route deleted successfully')
+    except Exception as e:
+        db.session.rollback()
+        return error_response(f'Failed to delete route: {str(e)}', status=500)
 
 # Student Management
 @admin_bp.route('/students', methods=['GET'])
@@ -376,7 +478,7 @@ def get_statistics():
             'total_parents': Parent.query.count(),
             'total_students': Student.query.count(),
             'total_buses': Bus.query.count(),
-            'active_buses': Bus.query.filter_by(status='active').count(),
+            'active_buses': Bus.query.filter_by(Status='ACTIVE').count(),
             'total_routes': Route.query.count()
         }
         return success_response(data=stats)

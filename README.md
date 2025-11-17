@@ -165,8 +165,8 @@ python init_db.py
 ```
 
 Lệnh này sẽ tạo database và tài khoản admin mặc định:
-- **Email**: `admin@smartbus.com`
-- **Password**: `admin123`
+- **tendangnhap**: `admin`
+- **Password**: `123456`
 
 ### 6. Chạy backend server
 
