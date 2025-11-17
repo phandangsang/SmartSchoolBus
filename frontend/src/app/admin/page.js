@@ -35,7 +35,7 @@ export default function AdminPage() {
     const [showScheduleModal, setShowScheduleModal] = useState(false);
 
     // Form data states
-    const [studentForm, setStudentForm] = useState({ id: '', name: '', class: '', address: '' });
+    const [studentForm, setStudentForm] = useState({ id: '', name: '', class: '', address: '', parent_id: '' });
     const [parentForm, setParentForm] = useState({ id: '', name: '', phone: '', email: '', address: '', username: '', password: '' });
     const [driverForm, setDriverForm] = useState({ id: '', name: '', phone: '', license: 'B2', bus: '', status: 'active', username: '', password: '' });
     const [busForm, setBusForm] = useState({ id: '', plateNumber: '', seats: '', status: 'running' });
@@ -169,27 +169,33 @@ export default function AdminPage() {
         if (studentForm.name && studentForm.class) {
             try {
                 setLoading(true);
+                if (!studentForm.parent_id) {
+                    alert('Vui lòng chọn phụ huynh cho học sinh');
+                    setLoading(false);
+                    return;
+                }
                 if (editingStudent) {
                     // Update existing student
                     const updateData = {
                         full_name: studentForm.name,
                         class_name: studentForm.class,
-                        school_name: studentForm.address
+                        school_name: studentForm.address,
+                        parent_id: parseInt(studentForm.parent_id)
                     };
                     await adminAPI.updateStudent(editingStudent.id, updateData);
                     setEditingStudent(null);
                 } else {
-                    // Add new student - need parent_id
+                    // Add new student
                     const newStudentData = {
                         full_name: studentForm.name,
                         class_name: studentForm.class,
                         school_name: studentForm.address,
-                        parent_id: 1 // Default parent, should be selected from dropdown
+                        parent_id: parseInt(studentForm.parent_id)
                     };
                     await adminAPI.createStudent(newStudentData);
                 }
                 await loadStudents(); // Reload students from backend
-                setStudentForm({ id: '', name: '', class: '', address: '' });
+                setStudentForm({ id: '', name: '', class: '', address: '', parent_id: '' });
                 setShowStudentModal(false);
             } catch (error) {
                 console.error('Failed to save student:', error);
@@ -203,7 +209,7 @@ export default function AdminPage() {
 
     const handleEditStudent = (student) => {
         setEditingStudent(student);
-        setStudentForm(student);
+        setStudentForm({ ...student, parent_id: student.parent_id });
         setShowStudentModal(true);
     };
 
@@ -942,7 +948,7 @@ export default function AdminPage() {
             </div>
 
             {/* Modal Thêm Học sinh */}
-            <Modal show={showStudentModal} onHide={() => { setShowStudentModal(false); setEditingStudent(null); setStudentForm({ id: '', name: '', class: '', address: '' }); }}>
+            <Modal show={showStudentModal} onHide={() => { setShowStudentModal(false); setEditingStudent(null); setStudentForm({ id: '', name: '', class: '', address: '', parent_id: '' }); }}>
                 <Modal.Header closeButton>
                     <Modal.Title>{editingStudent ? 'Sửa thông tin học sinh' : 'Thêm học sinh mới'}</Modal.Title>
                 </Modal.Header>
@@ -952,7 +958,7 @@ export default function AdminPage() {
                             <Form.Label>Họ và tên </Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder=""
+                                placeholder="Nhập họ tên học sinh"
                                 value={studentForm.name || ''}
                                 onChange={(e) => setStudentForm({ ...studentForm, name: e.target.value })}
                             />
@@ -961,7 +967,7 @@ export default function AdminPage() {
                             <Form.Label>Lớp </Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Ví dụ: 10A1"
+                                placeholder=""
                                 value={studentForm.class || ''}
                                 onChange={(e) => setStudentForm({ ...studentForm, class: e.target.value })}
                             />
@@ -970,10 +976,24 @@ export default function AdminPage() {
                             <Form.Label>Trường</Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Tên trường học"
+                                placeholder=""
                                 value={studentForm.address || ''}
                                 onChange={(e) => setStudentForm({ ...studentForm, address: e.target.value })}
                             />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Phụ huynh </Form.Label>
+                            <Form.Select
+                                value={studentForm.parent_id || ''}
+                                onChange={(e) => setStudentForm({ ...studentForm, parent_id: e.target.value })}
+                            >
+                                <option value="">Chọn phụ huynh</option>
+                                {parents.map((parent) => (
+                                    <option key={parent.id} value={parent.id}>
+                                        {parent.name} - {parent.phone}
+                                    </option>
+                                ))}
+                            </Form.Select>
                         </Form.Group>
                     </Form>
                 </Modal.Body>
@@ -1003,7 +1023,7 @@ export default function AdminPage() {
                                 onChange={(e) => setDriverForm({ ...driverForm, username: e.target.value })}
                                 disabled={editingDriver}
                             />
-                            {editingDriver && <Form.Text className="text-muted">Tên đăng nhập không thể thay đổi</Form.Text>}
+                            {editingDriver && <Form.Text className="text-muted"></Form.Text>}
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Label>Mật khẩu </Form.Label>
@@ -1092,13 +1112,13 @@ export default function AdminPage() {
                                 onChange={(e) => setParentForm({ ...parentForm, username: e.target.value })}
                                 disabled={editingParent}
                             />
-                            {editingParent && <Form.Text className="text-muted">Tên đăng nhập không thể thay đổi</Form.Text>}
+                            {editingParent && <Form.Text className="text-muted"></Form.Text>}
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Label>Mật khẩu {!editingParent}</Form.Label>
                             <Form.Control
                                 type="password"
-                                placeholder={editingParent ? "Để trống nếu không đổi mật khẩu" : "Nhập mật khẩu"}
+                                placeholder={editingParent ? "" : ""}
                                 value={parentForm.password}
                                 onChange={(e) => setParentForm({ ...parentForm, password: e.target.value })}
                             />
@@ -1116,7 +1136,7 @@ export default function AdminPage() {
                             <Form.Label>Số điện thoại </Form.Label>
                             <Form.Control
                                 type="tel"
-                                placeholder="Nhập số điện thoại"
+                                placeholder=""
                                 value={parentForm.phone}
                                 onChange={(e) => setParentForm({ ...parentForm, phone: e.target.value })}
                             />
@@ -1125,7 +1145,7 @@ export default function AdminPage() {
                             <Form.Label>Email</Form.Label>
                             <Form.Control
                                 type="email"
-                                placeholder="Nhập email"
+                                placeholder=""
                                 value={parentForm.email}
                                 onChange={(e) => setParentForm({ ...parentForm, email: e.target.value })}
                             />
@@ -1134,7 +1154,7 @@ export default function AdminPage() {
                             <Form.Label>Địa chỉ</Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Nhập địa chỉ"
+                                placeholder=""
                                 value={parentForm.address}
                                 onChange={(e) => setParentForm({ ...parentForm, address: e.target.value })}
                             />
