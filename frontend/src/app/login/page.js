@@ -117,12 +117,6 @@ export default function LoginPage() {
                                     >
                                         Đăng nhập
                                     </Button>
-
-                                    <div className="text-center mb-3">
-                                        <small className="text-muted">
-                                            Liên hệ quản trị viên để được cấp tài khoản
-                                        </small>
-                                    </div>
                                 </Form>
 
 
