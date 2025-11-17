@@ -34,7 +34,7 @@ export default function AdminPage() {
 
     // Form data states
     const [studentForm, setStudentForm] = useState({ id: '', name: '', class: '', address: '' });
-    const [driverForm, setDriverForm] = useState({ id: '', name: '', phone: '', license: 'B2', bus: '', status: 'active' });
+    const [driverForm, setDriverForm] = useState({ id: '', name: '', phone: '', license: 'B2', bus: '', status: 'active', username: '', password: '' });
     const [busForm, setBusForm] = useState({ id: '', plateNumber: '', seats: '', status: 'running' });
     const [routeForm, setRouteForm] = useState({ id: '', name: '', distance: '' });
     const [scheduleForm, setScheduleForm] = useState({ id: '', route: '', bus: '', departure: '', arrival: '', status: 'scheduled' });
@@ -93,7 +93,8 @@ export default function AdminPage() {
                     name: d.full_name,
                     phone: d.phone,
                     license: d.license_number || '',
-                    status: d.status?.toLowerCase() || 'active'
+                    status: d.status?.toLowerCase() || 'active',
+                    user: d.user // Lưu thông tin user để dùng khi edit
                 }));
                 setDrivers(transformedDrivers);
             }
@@ -109,7 +110,7 @@ export default function AdminPage() {
             if (response.success) {
                 const transformedBuses = response.data.map(b => ({
                     id: b.id,
-                    plateNumber: b.license_plate,
+                    plateNumber: b.plate_number,
                     seats: b.capacity,
                     status: b.status?.toLowerCase() || 'active'
                 }));
@@ -206,23 +207,36 @@ export default function AdminPage() {
                         license_number: driverForm.license,
                         status: driverForm.status?.toUpperCase() || 'ACTIVE'
                     };
+                    // Nếu có password mới, thêm vào data để cập nhật
+                    if (driverForm.password) {
+                        updateData.password = driverForm.password;
+                    }
                     await adminAPI.updateDriver(editingDriver.id, updateData);
                     setEditingDriver(null);
                 } else {
+                    // Tạo mới driver với tài khoản
+                    if (!driverForm.username || !driverForm.password) {
+                        alert('Vui lòng nhập tên đăng nhập và mật khẩu');
+                        setLoading(false);
+                        return;
+                    }
                     const newDriverData = {
+                        username: driverForm.username,
+                        password: driverForm.password,
                         full_name: driverForm.name,
                         phone: driverForm.phone,
                         license_number: driverForm.license,
-                        status: driverForm.status?.toUpperCase() || 'ACTIVE'
+                        role: 'DRIVER'
                     };
-                    await adminAPI.createDriver(newDriverData);
+                    await adminAPI.createUser(newDriverData);
                 }
                 await loadDrivers();
-                setDriverForm({ id: '', name: '', phone: '', license: 'B2', bus: '', status: 'active' });
+                setDriverForm({ id: '', name: '', phone: '', license: 'B2', bus: '', status: 'active', username: '', password: '' });
                 setShowDriverModal(false);
             } catch (error) {
                 console.error('Failed to save driver:', error);
-                alert('Lỗi: ' + (error.message || 'Không thể lưu tài xế'));
+                const errorMessage = error.response?.data?.message || error.message || 'Không thể lưu tài xế';
+                alert('Lỗi: ' + errorMessage);
             } finally {
                 setLoading(false);
             }
@@ -231,7 +245,11 @@ export default function AdminPage() {
 
     const handleEditDriver = (driver) => {
         setEditingDriver(driver);
-        setDriverForm(driver);
+        setDriverForm({
+            ...driver,
+            username: driver.user?.username || '',
+            password: '' // Reset password field khi edit
+        });
         setShowDriverModal(true);
     };
 
@@ -256,7 +274,7 @@ export default function AdminPage() {
                 setLoading(true);
                 if (editingBus) {
                     const updateData = {
-                        license_plate: busForm.plateNumber,
+                        plate_number: busForm.plateNumber,
                         capacity: parseInt(busForm.seats),
                         status: busForm.status
                     };
@@ -264,8 +282,7 @@ export default function AdminPage() {
                     setEditingBus(null);
                 } else {
                     const newBusData = {
-                        bus_number: 'BUS' + Date.now(),
-                        license_plate: busForm.plateNumber,
+                        plate_number: busForm.plateNumber,
                         capacity: parseInt(busForm.seats),
                         status: busForm.status
                     };
@@ -783,7 +800,7 @@ export default function AdminPage() {
                 <Modal.Body>
                     <Form>
                         <Form.Group className="mb-3">
-                            <Form.Label>Họ và tên <span className="text-danger">*</span></Form.Label>
+                            <Form.Label>Họ và tên </Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder=""
@@ -792,7 +809,7 @@ export default function AdminPage() {
                             />
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>Lớp <span className="text-danger">*</span></Form.Label>
+                            <Form.Label>Lớp </Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder=""
@@ -801,7 +818,7 @@ export default function AdminPage() {
                             />
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>Địa chỉ <span className="text-danger">*</span></Form.Label>
+                            <Form.Label>Địa chỉ </Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder=""
@@ -822,14 +839,35 @@ export default function AdminPage() {
             </Modal>
 
             {/* Modal Thêm Tài xế */}
-            <Modal show={showDriverModal} onHide={() => { setShowDriverModal(false); setEditingDriver(null); setDriverForm({ id: '', name: '', phone: '', license: 'B2', bus: '', status: 'active' }); }}>
+            <Modal show={showDriverModal} onHide={() => { setShowDriverModal(false); setEditingDriver(null); setDriverForm({ id: '', name: '', phone: '', license: 'B2', bus: '', status: 'active', username: '', password: '' }); }}>
                 <Modal.Header closeButton>
                     <Modal.Title>{editingDriver ? 'Sửa thông tin tài xế' : 'Thêm tài xế mới'}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
                         <Form.Group className="mb-3">
-                            <Form.Label>Họ và tên <span className="text-danger">*</span></Form.Label>
+                            <Form.Label>Tên đăng nhập </Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Nhập tên đăng nhập"
+                                value={driverForm.username}
+                                onChange={(e) => setDriverForm({ ...driverForm, username: e.target.value })}
+                                disabled={editingDriver}
+                            />
+                            {editingDriver && <Form.Text className="text-muted">Tên đăng nhập không thể thay đổi</Form.Text>}
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Mật khẩu </Form.Label>
+                            <Form.Control
+                                type="password"
+                                placeholder={editingDriver ? "" : ""}
+                                value={driverForm.password}
+                                onChange={(e) => setDriverForm({ ...driverForm, password: e.target.value })}
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Họ và tên
+                            </Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder=""
@@ -838,7 +876,7 @@ export default function AdminPage() {
                             />
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>Số điện thoại <span className="text-danger">*</span></Form.Label>
+                            <Form.Label>Số điện thoại </Form.Label>
                             <Form.Control
                                 type="tel"
                                 placeholder=""
@@ -883,7 +921,7 @@ export default function AdminPage() {
                         Hủy
                     </Button>
                     <Button variant="primary" onClick={handleAddDriver}>
-                        Thêm tài xế
+                        {editingDriver ? 'Cập nhật' : 'Thêm tài xế'}
                     </Button>
                 </Modal.Footer>
             </Modal>
@@ -896,7 +934,7 @@ export default function AdminPage() {
                 <Modal.Body>
                     <Form>
                         <Form.Group className="mb-3">
-                            <Form.Label>Mã xe <span className="text-danger">*</span></Form.Label>
+                            <Form.Label>Mã xe </Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder=""
@@ -905,7 +943,7 @@ export default function AdminPage() {
                             />
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>Biển số <span className="text-danger">*</span></Form.Label>
+                            <Form.Label>Biển số </Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder=""
@@ -914,7 +952,7 @@ export default function AdminPage() {
                             />
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>Số ghế <span className="text-danger">*</span></Form.Label>
+                            <Form.Label>Số ghế </Form.Label>
                             <Form.Control
                                 type="number"
                                 placeholder=""
@@ -953,7 +991,7 @@ export default function AdminPage() {
                 <Modal.Body>
                     <Form>
                         <Form.Group className="mb-3">
-                            <Form.Label>Mã tuyến <span className="text-danger">*</span></Form.Label>
+                            <Form.Label>Mã tuyến </Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder=""
@@ -962,7 +1000,7 @@ export default function AdminPage() {
                             />
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>Tuyến đường <span className="text-danger">*</span></Form.Label>
+                            <Form.Label>Tuyến đường </Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder=""
@@ -971,7 +1009,7 @@ export default function AdminPage() {
                             />
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>Khoảng cách <span className="text-danger">*</span></Form.Label>
+                            <Form.Label>Khoảng cách </Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder=""
@@ -999,7 +1037,7 @@ export default function AdminPage() {
                 <Modal.Body>
                     <Form>
                         <Form.Group className="mb-3">
-                            <Form.Label>Tuyến đường <span className="text-danger">*</span></Form.Label>
+                            <Form.Label>Tuyến đường </Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder=""
@@ -1008,7 +1046,7 @@ export default function AdminPage() {
                             />
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>Xe buýt <span className="text-danger">*</span></Form.Label>
+                            <Form.Label>Xe buýt </Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder=""
@@ -1017,7 +1055,7 @@ export default function AdminPage() {
                             />
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>Giờ xuất phát <span className="text-danger">*</span></Form.Label>
+                            <Form.Label>Giờ xuất phát </Form.Label>
                             <Form.Control
                                 type="time"
                                 value={scheduleForm.departure}
