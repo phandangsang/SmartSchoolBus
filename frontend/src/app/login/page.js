@@ -120,14 +120,8 @@ export default function LoginPage() {
 
                                     <div className="text-center mb-3">
                                         <small className="text-muted">
+                                            Liên hệ quản trị viên để được cấp tài khoản
                                         </small>
-                                    </div>
-
-                                    <div className="text-center">
-                                        <span className="text-muted">Chưa có tài khoản? </span>
-                                        <Link href="/register" className="text-decoration-none fw-bold">
-                                            Đăng ký ngay
-                                        </Link>
                                     </div>
                                 </Form>
 
